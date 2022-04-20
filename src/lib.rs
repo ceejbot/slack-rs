@@ -23,7 +23,7 @@ extern crate serde_derive;
 #[macro_use]
 extern crate log;
 
-pub use slack_api::sync as api;
+pub use slack_api as api;
 
 pub mod error;
 pub use crate::error::Error;
@@ -166,9 +166,9 @@ impl Sender {
 impl RtmClient {
     /// Logs in to slack. Call this before calling `run`.
     /// Alternatively use `login_and_run`.
-    pub fn login(token: &str) -> Result<RtmClient, Error> {
+    pub async fn login(token: &str) -> Result<RtmClient, Error> {
         let client = api::default_client()?;
-        let start_response = api::rtm::start(&client, token, &Default::default())?;
+        let start_response = api::rtm::start(&client, token, &Default::default()).await?;
 
         // setup channels for passing messages
         let (tx, rx) = mpsc::channel::<WsMessage>();
@@ -278,8 +278,8 @@ impl RtmClient {
     ///
     /// Takes an `EventHandler` implemented by the user which will be called when `Event`s are
     /// received.
-    pub fn login_and_run<T: EventHandler>(token: &str, handler: &mut T) -> Result<(), Error> {
-        let client = RtmClient::login(token)?;
+    pub async fn login_and_run<T: EventHandler>(token: &str, handler: &mut T) -> Result<(), Error> {
+        let client = RtmClient::login(token).await?;
         client.run(handler)
     }
 

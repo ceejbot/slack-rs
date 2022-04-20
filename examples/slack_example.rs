@@ -62,7 +62,8 @@ impl slack::EventHandler for MyHandler {
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let args: Vec<String> = std::env::args().collect();
     let api_key = match args.len() {
         0 | 1 => {
@@ -71,7 +72,7 @@ fn main() {
         x => args[x - 1].clone(),
     };
     let mut handler = MyHandler;
-    let r = RtmClient::login_and_run(&api_key, &mut handler);
+    let r = RtmClient::login_and_run(&api_key, &mut handler).await;
     match r {
         Ok(_) => {}
         Err(err) => panic!("Error: {}", err),
